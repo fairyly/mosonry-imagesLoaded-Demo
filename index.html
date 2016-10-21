@@ -2,11 +2,11 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>图片瀑布流简单demo</title>
+    <title>瀑布流（masonry+imagesloaded+infinitescroll）</title>
     <meta name="viewport" content="width=device-width,initial-scale=1, minimum-scale=1, maximum-scale=1">
-    <meta name="apple-mobile-web-app-title" content="图片瀑布流">
+    <meta name="apple-mobile-web-app-title" content="瀑布流">
     <script src="js/jquery-2.2.3.min.js"></script>
-    <script type="text/javascript">
+   <script type="text/javascript">
         var docEl = document.documentElement,
             //总来的来就是监听当然窗口的变化，一旦有变化就需要重新设置根字体的值
             resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
@@ -34,7 +34,7 @@
         text-align:center;
         padding: 10px;
         float: left;  
-        display: none; 
+        /*display: none; */
         border: 1px solid #DDD;
         background: #EEE;
         -moz-box-shadow:0 1px 3px rgba(0, 0, 0, .3);
@@ -66,24 +66,72 @@
             <div class="items"><img src="images/5.jpg"><p>描述文字</p></div>
             <div class="items"><img src="images/2.jpg"><p>描述文字</p></div>
             <div class="items"><img src="images/4.jpg"><p>描述文字</p></div>
+            <div class="loading">
+          
+            </div>
+            <div class="navigation">
+                <a href="json/more1.json?page=1"></a>
+            </div>
         </div>
     </div>
 
      <!-- 更多模板页面结束 -->
      <script type="text/javascript" src="js/masonry.pkgd.min.js"></script>
      <script type="text/javascript" src="js/imagesloaded.pkgd.min.js"></script>
+     <script type="text/javascript" src="js/jquery.infinitescroll.min.js"></script>
      <script type="text/javascript">
       $(".bottomnav li:eq(1) a").css("color","#04be02");
         $(document).ready(
+
             function() {
-                var container = $('#images .items');
-                var masonryContainer = $('#images');
-                container.imagesLoaded(function(){
-                container.fadeIn();
-                masonryContainer.masonry({
-                    itemSelector : '.items',
-                    isAnimated: true,
+                var $container = $('.container');
+                $container.imagesLoaded(function(){
+                    $container.masonry({
+                        itemSelector : '.items',
+                        isAnimated: true,
                     });
+                }); 
+                $container.infinitescroll({
+
+                    navSelector  : ".navigation",
+                    nextSelector : ".navigation a",
+                    itemSelector : ".items",
+                    dataType: 'json',
+                    debug: true, 
+                    animate: true,
+                    loading: {
+                        finishedMsg: 'No more pages to load.',
+                        img: 'http://i.imgur.com/6RMhx.gif',
+                        selector: '.loading'
+                    },
+                    template: function(data) {   
+                               //data表示服务端返回的json格式数据，这里需要把data转换成瀑布流块的html格式，然后返回给回到函数  
+                               var counter = 0;
+                                // 每页展示4个
+                                var num = 4;
+                                var pageStart = 0,pageEnd = 0; 
+                                var result = '';
+                                counter++;
+                                pageEnd = num * counter;
+                                pageStart = pageEnd - num;
+                                console.log("ajax请求成功");
+                                for(var i = pageStart; i < pageEnd; i++){
+                                    result += '<div class="items">'+'<img src="'+data.lists[i].pic+'" alt="">'+'<p>描述文字</p></div>';
+                                }
+                               console.log(data);
+                               return result;   
+                           },
+                },
+
+                    function( newElements ) {
+                        var $newElems = $( newElements ).hide();
+                        var $newElems = $( newElements ).css({ opacity: 0 });
+                        $newElems.imagesLoaded(function(){
+                            $newElems.show();
+                            $newElems.animate({ opacity: 1 });
+                            $container.masonry( 'appended', $newElems, true );
+                    });
+
                 });
             }
         );
