@@ -80,10 +80,9 @@
      <script type="text/javascript" src="js/imagesloaded.pkgd.min.js"></script>
      <script type="text/javascript" src="js/jquery.infinitescroll.min.js"></script>
      <script type="text/javascript">
-      $(".bottomnav li:eq(1) a").css("color","#04be02");
         $(document).ready(
 
-            function() {
+            function(){
                 var $container = $('#images');
                 $container.imagesLoaded(function(){
                     $container.masonry({
@@ -120,17 +119,15 @@
                                 }
                                console.log(data);
                                return result;   
-                           },
-                },
-
-                    function( newElements ) {
+                     },
+                },function( newElements ) {
                         var $newElems = $( newElements ).hide();
                         var $newElems = $( newElements ).css({ opacity: 0 });
                         $newElems.imagesLoaded(function(){
                             $newElems.show();
                             $newElems.animate({ opacity: 1 });
                             $container.masonry( 'appended', $newElems, true );
-                    });
+                        });
 
                 });
             }
